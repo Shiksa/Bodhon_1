@@ -1,126 +1,147 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Phase } from "@/config/tithis";
 import { useRadio } from "@/hooks/useRadio";
-import { bn } from "@/lib/time";
-import { PauseIcon, PlayIcon, ShareIcon, VolumeIcon } from "./Icons";
+import { thumb } from "@/lib/youtube";
+import {
+  CloseIcon,
+  ListIcon,
+  NextIcon,
+  PauseIcon,
+  PlayIcon,
+  PrevIcon,
+  RepeatIcon,
+  ShareIcon,
+  ShuffleIcon,
+  VolumeIcon,
+  YouTubeIcon,
+} from "./Icons";
 
-const mmss = (s: number) =>
-  `${bn(Math.floor(s / 60))}:${bn(String(Math.floor(s % 60)).padStart(2, "0"))}`;
+const mmss = (secs: number) => {
+  const s = Math.max(0, Math.floor(secs || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return h ? `${h}:${p(m)}:${p(s % 60)}` : `${m}:${p(s % 60)}`;
+};
 
-/**
- * Audio-only face for the radio: a spinning record whose label is the current
- * song's YouTube cover. The YouTube player sits underneath it, hidden.
- */
-function Record({ id, spinning }: { id?: string; spinning: boolean }) {
+type Radio = Omit<ReturnType<typeof useRadio>, "hostRef">;
+
+/** Bottom sheet on phones, centred card on desktop. */
+function Sheet({
+  title,
+  onClose,
+  children,
+}: {
+  title: ReactNode;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [onClose]);
   return (
-    <div className="relative h-full w-full">
-      <div
-        className={`record absolute inset-0 ${spinning ? "" : "record-paused"}`}
-      >
-        <svg viewBox="0 0 200 200" className="h-full w-full" aria-hidden>
-          <defs>
-            <radialGradient id="vinyl" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0.35" stopColor="#1f100b" />
-              <stop offset="1" stopColor="#0b0504" />
-            </radialGradient>
-            <clipPath id="label">
-              <circle cx="100" cy="100" r="38" />
-            </clipPath>
-          </defs>
-          <circle cx="100" cy="100" r="98" fill="url(#vinyl)" />
-          {Array.from({ length: 11 }, (_, i) => (
-            <circle
-              key={i}
-              cx="100"
-              cy="100"
-              r={44 + i * 5}
-              fill="none"
-              stroke="#ffffff"
-              strokeOpacity={i % 3 ? 0.05 : 0.09}
-              strokeWidth="1"
-            />
-          ))}
-          <circle
-            cx="100"
-            cy="100"
-            r="98"
-            fill="none"
-            stroke="#f2c14e"
-            strokeOpacity="0.5"
-            strokeWidth="1.5"
-          />
-          {id ? (
-            <image
-              href={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`}
-              x="52"
-              y="62"
-              width="96"
-              height="76"
-              preserveAspectRatio="xMidYMid slice"
-              clipPath="url(#label)"
-            />
-          ) : (
-            <g>
-              <circle cx="100" cy="100" r="38" fill="#c2241a" />
-              <text
-                x="100"
-                y="108"
-                textAnchor="middle"
-                fontSize="22"
-                fill="#fbf1dc"
-                fontFamily="Galada, serif"
-              >
-                বোধন
-              </text>
-            </g>
-          )}
-          <circle
-            cx="100"
-            cy="100"
-            r="38"
-            fill="none"
-            stroke="#f2c14e"
-            strokeWidth="2.5"
-          />
-          <circle cx="100" cy="100" r="4" fill="#f6e7c8" />
-        </svg>
-      </div>
-      {/* fixed sheen so the record reads as glossy while it spins */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-full bg-[conic-gradient(from_200deg,transparent_0deg,rgba(255,255,255,0.10)_25deg,transparent_60deg,transparent_180deg,rgba(255,255,255,0.07)_210deg,transparent_240deg)]"
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+        onClick={onClose}
       />
-      {/* brass tonearm drops onto the record while it plays */}
-      <svg
-        viewBox="0 0 60 100"
-        aria-hidden
-        className="pointer-events-none absolute -right-2 -top-2 h-[62%] w-[38%] transition-transform duration-700 ease-out"
-        style={{
-          transformOrigin: "78% 12%",
-          transform: `rotate(${spinning ? 24 : 0}deg)`,
-        }}
-      >
-        <circle cx="47" cy="12" r="8" fill="#a8741a" />
-        <circle cx="47" cy="12" r="3.5" fill="#f2c14e" />
-        <path
-          d="M47,12 L30,82"
-          stroke="#f2c14e"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-        <rect
-          x="23"
-          y="78"
-          width="12"
-          height="16"
-          rx="2"
-          transform="rotate(14 29 86)"
-          fill="#e9d6b8"
-        />
-      </svg>
+      <div className="sheet-in relative flex max-h-[75svh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-[#1f0c07]/95 shadow-2xl backdrop-blur-xl sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div className="text-[15px] font-semibold tracking-wide text-ivory">
+            {title}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid h-9 w-9 place-items-center rounded-full bg-white/5 text-ivory hover:bg-white/10"
+          >
+            <CloseIcon width={18} height={18} />
+          </button>
+        </div>
+        <div className="overflow-y-auto overscroll-contain">{children}</div>
+      </div>
     </div>
+  );
+}
+
+function PlaylistSheet({ r, onClose }: { r: Radio; onClose: () => void }) {
+  const activeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => activeRef.current?.scrollIntoView({ block: "center" }), []);
+  return (
+    <Sheet
+      title={
+        <span className="flex items-center gap-2">
+          <ListIcon width={18} height={18} /> Playlist{" "}
+          <span className="font-serif font-normal text-[color:var(--accent)]">
+            · পুজোর গান
+          </span>
+        </span>
+      }
+      onClose={onClose}
+    >
+      <ul className="p-2 pb-4">
+        {r.tracks.length === 0 && (
+          <li className="px-4 py-8 text-center text-sm text-ivory/60">
+            Loading songs…
+          </li>
+        )}
+        {r.tracks.map((t, i) => {
+          const active = !!r.track && i === r.current;
+          return (
+            <li key={`${t.id}-${i}`}>
+              <button
+                ref={active ? activeRef : undefined}
+                type="button"
+                onClick={() => r.playAt(i)}
+                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition ${active ? "bg-white/10" : "hover:bg-white/5"}`}
+              >
+                <span className="w-5 shrink-0 text-center text-xs tabular-nums text-ivory/45">
+                  {active && r.playing ? (
+                    <span className="eq inline-flex h-3.5 items-end gap-[2px]">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  ) : (
+                    i + 1
+                  )}
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumb(t.id).replace("hqdefault", "mqdefault")}
+                  alt=""
+                  loading="lazy"
+                  className="h-11 w-16 shrink-0 rounded-lg object-cover"
+                />
+                <span className="min-w-0 flex-1">
+                  <span
+                    className={`line-clamp-2 text-[13.5px] leading-snug ${active ? "text-[color:var(--accent)]" : "text-ivory"}`}
+                  >
+                    {t.title ?? "Loading title…"}
+                  </span>
+                  {t.author && (
+                    <span className="block truncate text-[11.5px] text-ivory/50">
+                      {t.author}
+                    </span>
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Sheet>
   );
 }
 
@@ -134,163 +155,238 @@ export function RadioDock({
   onShare: () => void;
 }) {
   const { hostRef, ...r } = useRadio(phase);
-  const [muted, setMuted] = useState(false);
-  const np = r.np;
-  const pct = np.dur > 0 ? Math.min(100, (np.pos / np.dur) * 100) : 0;
-  const left = Math.max(0, np.dur - np.pos);
+  const [showList, setShowList] = useState(false);
 
-  const toggleMute = () => {
-    const m = !muted;
-    setMuted(m);
-    r.setVolume(m ? 0 : Math.max(r.volume, 60));
-  };
+  const t = r.track;
+  const pct =
+    r.time.dur > 0 ? Math.min(100, (r.time.pos / r.time.dur) * 100) : 0;
+  const title = t?.title ?? "Durga Pujo songs";
+  const long = !!t?.title && t.title.length > 34;
+  const sub =
+    r.status === "offline"
+      ? "YouTube isn't reachable right now"
+      : r.status === "loading" && t
+        ? "Loading…"
+        : t
+          ? (t.author ?? "Durga Pujo songs")
+          : "Tap play · non-stop Pujo songs";
 
-  const statusText =
-    r.status === "connecting"
-      ? "যুক্ত হচ্ছে…"
-      : r.status === "buffering"
-        ? "বাজছে…"
-        : r.status === "offline"
-          ? "ইউটিউব পাওয়া যাচ্ছে না"
-          : r.listening
-            ? "সরাসরি বাজছে"
-            : r.synced
-              ? "সরাসরি · সবাই একসাথে"
-              : "পুজোর গান · বিরামহীন";
+  const iconBtn =
+    "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ivory/80 transition hover:bg-white/10 hover:text-ivory";
+  const vol = r.muted ? 0 : r.volume;
+
+  const cover = (size: string) => (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-2xl bg-[#2a0f08] ${size}`}
+    >
+      {t ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={thumb(t.id).replace("hqdefault", "mqdefault")}
+          alt=""
+          className={`h-full w-full scale-[1.35] object-cover ${r.playing ? "cover-breathe" : ""}`}
+        />
+      ) : (
+        <span className="grid h-full w-full place-items-center font-display text-[20px] text-[color:var(--accent)]">
+          বোধন
+        </span>
+      )}
+    </div>
+  );
+
+  const titleLine = (
+    <div className="min-w-0 flex-1 overflow-hidden">
+      <div
+        className={`whitespace-nowrap text-[15.5px] font-semibold text-ivory ${long ? "marquee" : "truncate"}`}
+      >
+        {title}
+        {long && <span className="pl-12">{title}</span>}
+      </div>
+    </div>
+  );
+
+  const playlistBtn = (
+    <button
+      type="button"
+      onClick={() => setShowList(true)}
+      className="flex shrink-0 items-center gap-1.5 rounded-full border border-[color:var(--accent)]/60 bg-[color:var(--accent)]/10 px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-[color:var(--accent)] transition hover:bg-[color:var(--accent)]/20"
+    >
+      <ListIcon width={13} height={13} /> Playlist
+    </button>
+  );
+
+  const seekBar = (
+    <input
+      type="range"
+      min={0}
+      max={Math.max(1, Math.floor(r.time.dur))}
+      value={Math.floor(r.time.pos)}
+      onChange={(e) => r.seek(Number(e.target.value))}
+      disabled={!t}
+      className="seek min-w-0 flex-1"
+      style={{ ["--v" as string]: `${pct}%` }}
+      aria-label="Seek"
+    />
+  );
+
+  const controls = (
+    <>
+      <button
+        type="button"
+        onClick={r.toggleShuffle}
+        aria-pressed={r.shuffle}
+        aria-label="Shuffle"
+        title={r.shuffle ? "Shuffle on" : "Shuffle off"}
+        className={`${iconBtn} ${r.shuffle ? "text-[color:var(--accent)]" : ""}`}
+      >
+        <ShuffleIcon width={19} height={19} />
+      </button>
+      <button
+        type="button"
+        onClick={r.prev}
+        aria-label="Previous"
+        title="Previous"
+        className={iconBtn}
+      >
+        <PrevIcon width={19} height={19} />
+      </button>
+      <button
+        type="button"
+        onClick={r.toggle}
+        disabled={!r.hasSongs}
+        aria-label={r.playing ? "Pause" : "Play"}
+        className={`mx-1 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-ivory text-[#2a0f08] shadow-[0_0_0_5px_rgba(255,255,255,0.08),0_0_26px_-6px_rgba(255,220,150,0.9)] transition hover:scale-105 disabled:opacity-50 ${!r.playing ? "play-glow" : ""}`}
+      >
+        {r.playing ? (
+          <PauseIcon width={22} height={22} />
+        ) : (
+          <PlayIcon width={22} height={22} className="ml-1" />
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={r.next}
+        aria-label="Next"
+        title="Next"
+        className={iconBtn}
+      >
+        <NextIcon width={19} height={19} />
+      </button>
+      <button
+        type="button"
+        onClick={r.toggleRepeat}
+        aria-label={r.repeat === "one" ? "Repeat one" : "Repeat all"}
+        title={r.repeat === "one" ? "Repeat this song" : "Repeat playlist"}
+        className={`${iconBtn} text-[color:var(--accent)]`}
+      >
+        <RepeatIcon width={19} height={19} one={r.repeat === "one"} />
+      </button>
+    </>
+  );
+
+  const chip =
+    "flex items-center gap-1.5 rounded-full border border-white/12 bg-black/25 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-ivory transition hover:bg-black/40";
 
   return (
     <section
-      aria-label="Bodhan live radio"
-      className="dock relative mx-auto grid w-full max-w-[680px] gap-x-4 gap-y-3 rounded-[22px] border border-[color:var(--accent)]/45 bg-[#1a0906]/70 p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-xl [grid-template-areas:'frame_info''ctrl_ctrl'] [grid-template-columns:104px_1fr] sm:[grid-template-columns:132px_1fr] sm:[grid-template-areas:'frame_info''frame_ctrl']"
+      aria-label="Music player"
+      className="relative mx-auto w-full max-w-[560px] rounded-[22px] border border-white/12 bg-[linear-gradient(135deg,rgba(64,24,14,0.9),rgba(28,10,6,0.9))] p-3 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:max-w-[820px] lg:px-3.5"
     >
-      {/* corner ornaments */}
-      <span
+      {/* the YouTube player plays here, hidden */}
+      <div
+        ref={hostRef}
         aria-hidden
-        className="pointer-events-none absolute -top-[7px] left-1/2 h-3.5 w-24 -translate-x-1/2 rounded-full bg-[color:var(--accent)]/90 [mask:radial-gradient(circle_at_50%_100%,transparent_5px,#000_6px)]"
+        className="pointer-events-none absolute left-3 top-3 h-14 w-14 overflow-hidden rounded-2xl opacity-[0.01] [&>iframe]:h-full [&>iframe]:w-full"
       />
 
-      {/* Audio only: the YouTube player plays underneath, covered by the record. */}
-      <div className="relative h-[104px] w-[104px] self-center sm:h-[132px] sm:w-[132px] [grid-area:frame]">
-        <div
-          ref={hostRef}
-          aria-hidden
-          className="pointer-events-none absolute inset-2 overflow-hidden rounded-full [&>iframe]:h-full [&>iframe]:w-full"
-        />
-        <div className="absolute inset-0 z-10">
-          <Record
-            id={r.hasSongs ? np.id : undefined}
-            spinning={r.status === "live"}
-          />
+      {/* Desktop: one row */}
+      <div className="hidden items-center gap-3.5 lg:flex">
+        {cover("h-14 w-14")}
+        <div className="grid min-w-[300px] flex-1 gap-1">
+          <div className="flex min-w-0 items-center gap-2">
+            {titleLine}
+            <YouTubeIcon className="shrink-0" />
+            {playlistBtn}
+          </div>
+          <div className="truncate text-[12.5px] text-ivory/60">{sub}</div>
+          <div className="flex items-center gap-2 text-[11px] tabular-nums text-ivory/55">
+            <span className="w-9 text-right">{mmss(r.time.pos)}</span>
+            {seekBar}
+            <span className="w-9">{mmss(r.time.dur)}</span>
+          </div>
         </div>
-      </div>
-
-      <div className="flex min-w-0 flex-col justify-center [grid-area:info]">
-        <div className="mb-1.5 flex items-center gap-2 text-[12px] font-medium tracking-wide text-ivory/85">
-          <span
-            className={`inline-block h-2 w-2 rounded-full bg-[#ff4b2b] ${r.listening ? "live-dot" : ""}`}
-          />
-          <span>{r.hasSongs ? statusText : "শিগগিরই"}</span>
-        </div>
-        {r.hasSongs ? (
-          <>
-            <h2 className="line-clamp-2 font-serif text-[17px] leading-snug text-ivory sm:text-[19px]">
-              {np.title ?? "পুজোর গান"}
-            </h2>
-            <p className="mt-0.5 truncate text-[13px] text-ivory/65">
-              {np.artist ?? (r.synced ? " " : "নন-স্টপ · Non-stop")}
-            </p>
-            {np.dur > 0 && (
-              <>
-                <div
-                  className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ivory/15"
-                  aria-hidden
-                >
-                  <div
-                    className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-1000 ease-linear"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="mt-1 flex justify-between text-[11px] tabular-nums text-ivory/55">
-                  <span>{mmss(np.pos)}</span>
-                  <span>-{mmss(left)}</span>
-                </div>
-              </>
-            )}
-            {np.next && (
-              <p className="mt-1.5 truncate text-[12px] text-ivory/60">
-                <span className="text-[color:var(--accent)]">এর পরে</span> ·{" "}
-                {np.next}
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            <h2 className="font-serif text-[18px] leading-snug text-ivory">
-              গানের তালিকা তৈরি হচ্ছে
-            </h2>
-            <p className="mt-1 text-[13px] text-ivory/65">
-              Songs are being added. The radio goes live soon.
-            </p>
-          </>
-        )}
-      </div>
-
-      <div className="flex items-center gap-2.5 [grid-area:ctrl] sm:self-end">
-        {r.listening ? (
+        <div className="flex items-center">
+          {controls}
           <button
             type="button"
-            onClick={r.pause}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-ivory/25 bg-ivory/10 font-medium text-ivory transition hover:bg-ivory/15"
+            onClick={r.toggleMute}
+            aria-label={r.muted ? "Unmute" : "Mute"}
+            title={r.muted ? "Unmute" : "Mute"}
+            className={`${iconBtn} ml-1`}
           >
-            <PauseIcon /> <span>থামান</span>
+            <VolumeIcon
+              width={19}
+              height={19}
+              muted={r.muted || r.volume === 0}
+            />
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={r.join}
-            disabled={!r.hasSongs}
-            className="dhak-beat flex h-12 flex-1 items-center justify-center gap-2.5 rounded-full bg-[color:var(--accent)] px-4 font-serif text-[17px] text-[#2a1205] shadow-[0_0_30px_-4px_var(--accent)] transition hover:brightness-110 disabled:animate-none disabled:opacity-50"
-          >
-            <PlayIcon />
-            <span className="leading-none">
-              {r.status === "paused" ? "আবার শুনুন" : "ঢাকে কাঠি পড়ুক"}
-              <span className="ml-2 hidden font-ui text-[12px] opacity-75 sm:inline">
-                {r.status === "paused" ? "Rejoin live" : "Tap to listen"}
-              </span>
-            </span>
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={toggleMute}
-          aria-label={muted ? "Unmute" : "Mute"}
-          className="grid h-12 w-12 place-items-center rounded-full border border-ivory/20 bg-ivory/5 text-ivory transition hover:bg-ivory/15 sm:hidden"
-        >
-          <VolumeIcon muted={muted} />
-        </button>
-        <label className="hidden items-center gap-2 text-ivory/80 sm:flex">
-          <VolumeIcon muted={r.volume === 0} />
           <input
             type="range"
             min={0}
             max={100}
-            value={r.volume}
+            value={vol}
             onChange={(e) => r.setVolume(Number(e.target.value))}
-            className="vol w-24"
-            style={{ ["--v" as string]: `${r.volume}%` }}
+            className="seek w-16"
+            style={{ ["--v" as string]: `${vol}%` }}
             aria-label="Volume"
           />
-        </label>
-        <button
-          type="button"
-          onClick={onShare}
-          aria-label="Share"
-          title={shareText}
-          className="grid h-12 w-12 place-items-center rounded-full border border-ivory/20 bg-ivory/5 text-ivory transition hover:bg-ivory/15"
-        >
-          <ShareIcon />
-        </button>
+          <button
+            type="button"
+            onClick={onShare}
+            aria-label="Share"
+            title={shareText}
+            className={`${iconBtn} ml-1`}
+          >
+            <ShareIcon width={18} height={18} />
+          </button>
+        </div>
       </div>
+
+      {/* Phone and tablet: stacked */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 lg:hidden">
+        <div className="flex min-w-0 items-center gap-3">
+          {cover("h-[56px] w-[56px]")}
+          <div className="min-w-0 flex-1">
+            {titleLine}
+            <div className="mt-0.5 truncate text-[12.5px] text-ivory/60">
+              {sub}
+            </div>
+          </div>
+          {playlistBtn}
+        </div>
+        <div className="flex items-center gap-2 text-[11px] tabular-nums text-ivory/55">
+          <span className="w-9 text-right">{mmss(r.time.pos)}</span>
+          {seekBar}
+          <span className="w-9">{mmss(r.time.dur)}</span>
+        </div>
+        <div className="flex items-center justify-between px-1">{controls}</div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={r.toggleMute}
+            aria-pressed={r.muted}
+            className={`${chip} ${r.muted ? "border-[color:var(--accent)] text-[color:var(--accent)]" : ""}`}
+          >
+            <VolumeIcon width={14} height={14} muted={r.muted} />{" "}
+            {r.muted ? "Muted" : "Sound"}
+          </button>
+          <button type="button" onClick={onShare} className={chip}>
+            <ShareIcon width={14} height={14} /> Share
+          </button>
+        </div>
+      </div>
+
+      {showList && <PlaylistSheet r={r} onClose={() => setShowList(false)} />}
     </section>
   );
 }
