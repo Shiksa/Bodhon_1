@@ -145,6 +145,118 @@ function PlaylistSheet({ r, onClose }: { r: Radio; onClose: () => void }) {
   );
 }
 
+/** The spinning record (CD look): the current song's cover is the label, a brass tonearm drops on while playing. */
+function Record({ id, spinning }: { id?: string; spinning: boolean }) {
+  return (
+    <div className="relative h-full w-full">
+      <div
+        className={`record absolute inset-0 ${spinning ? "" : "record-paused"}`}
+      >
+        <svg viewBox="0 0 200 200" className="h-full w-full" aria-hidden>
+          <defs>
+            <radialGradient id="vinyl" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0.35" stopColor="#1f100b" />
+              <stop offset="1" stopColor="#0b0504" />
+            </radialGradient>
+            <clipPath id="label">
+              <circle cx="100" cy="100" r="38" />
+            </clipPath>
+          </defs>
+          <circle cx="100" cy="100" r="98" fill="url(#vinyl)" />
+          {Array.from({ length: 11 }, (_, i) => (
+            <circle
+              key={i}
+              cx="100"
+              cy="100"
+              r={44 + i * 5}
+              fill="none"
+              stroke="#ffffff"
+              strokeOpacity={i % 3 ? 0.05 : 0.09}
+              strokeWidth="1"
+            />
+          ))}
+          <circle
+            cx="100"
+            cy="100"
+            r="98"
+            fill="none"
+            stroke="#f2c14e"
+            strokeOpacity="0.5"
+            strokeWidth="1.5"
+          />
+          {id ? (
+            <image
+              href={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`}
+              x="52"
+              y="62"
+              width="96"
+              height="76"
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#label)"
+            />
+          ) : (
+            <g>
+              <circle cx="100" cy="100" r="38" fill="#c2241a" />
+              <text
+                x="100"
+                y="108"
+                textAnchor="middle"
+                fontSize="22"
+                fill="#fbf1dc"
+                fontFamily="Galada, serif"
+              >
+                বোধন
+              </text>
+            </g>
+          )}
+          <circle
+            cx="100"
+            cy="100"
+            r="38"
+            fill="none"
+            stroke="#f2c14e"
+            strokeWidth="2.5"
+          />
+          <circle cx="100" cy="100" r="4" fill="#f6e7c8" />
+        </svg>
+      </div>
+      {/* fixed sheen so the record reads as glossy while it spins */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-full bg-[conic-gradient(from_200deg,transparent_0deg,rgba(255,255,255,0.10)_25deg,transparent_60deg,transparent_180deg,rgba(255,255,255,0.07)_210deg,transparent_240deg)]"
+      />
+      {/* brass tonearm drops onto the record while it plays */}
+      <svg
+        viewBox="0 0 60 100"
+        aria-hidden
+        className="pointer-events-none absolute -right-2 -top-2 h-[62%] w-[38%] transition-transform duration-700 ease-out"
+        style={{
+          transformOrigin: "78% 12%",
+          transform: `rotate(${spinning ? 24 : 0}deg)`,
+        }}
+      >
+        <circle cx="47" cy="12" r="8" fill="#a8741a" />
+        <circle cx="47" cy="12" r="3.5" fill="#f2c14e" />
+        <path
+          d="M47,12 L30,82"
+          stroke="#f2c14e"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
+        <rect
+          x="23"
+          y="78"
+          width="12"
+          height="16"
+          rx="2"
+          transform="rotate(14 29 86)"
+          fill="#e9d6b8"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function RadioDock({
   phase,
   shareText,
@@ -176,21 +288,8 @@ export function RadioDock({
   const vol = r.muted ? 0 : r.volume;
 
   const cover = (size: string) => (
-    <div
-      className={`relative shrink-0 overflow-hidden rounded-2xl bg-[#2a0f08] ${size}`}
-    >
-      {t ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={thumb(t.id).replace("hqdefault", "mqdefault")}
-          alt=""
-          className={`h-full w-full scale-[1.35] object-cover ${r.playing ? "cover-breathe" : ""}`}
-        />
-      ) : (
-        <span className="grid h-full w-full place-items-center font-display text-[24px] text-[color:var(--accent)]">
-          বোধন
-        </span>
-      )}
+    <div className={`relative shrink-0 ${size}`}>
+      <Record id={t?.id} spinning={r.playing} />
     </div>
   );
 
@@ -301,7 +400,7 @@ export function RadioDock({
 
       {/* Desktop: one row */}
       <div className="hidden items-center gap-4 lg:flex">
-        {cover("h-[84px] w-[84px]")}
+        {cover("h-[92px] w-[92px]")}
         <div className="grid min-w-[300px] flex-1 gap-1.5">
           <div className="flex min-w-0 items-center gap-2">
             {titleLine}
@@ -355,7 +454,7 @@ export function RadioDock({
       {/* Phone and tablet: stacked */}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-3.5 lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          {cover("h-[68px] w-[68px]")}
+          {cover("h-[76px] w-[76px]")}
           <div className="min-w-0 flex-1">
             {titleLine}
             <div className="mt-1 truncate text-[13px] text-ivory/60">{sub}</div>

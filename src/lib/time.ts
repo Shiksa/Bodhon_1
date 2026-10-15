@@ -1,4 +1,14 @@
-import { EVENTS, PHASES, SLOTS, type Phase, type PhaseId, type PujoEvent, type Slot } from "@/config/tithis";
+import {
+  EVENTS,
+  GREETINGS,
+  PHASES,
+  SLOTS,
+  type Greeting,
+  type Phase,
+  type PhaseId,
+  type PujoEvent,
+  type Slot,
+} from "@/config/tithis";
 
 const IST_OFFSET_MS = 330 * 60 * 1000;
 
@@ -16,7 +26,10 @@ export async function syncClock(): Promise<number> {
   if (Date.now() - lastSync < 25_000) return clockOffset;
   try {
     const t0 = Date.now();
-    const res = await fetch(window.location.pathname + `?t=${t0}`, { method: "HEAD", cache: "no-store" });
+    const res = await fetch(window.location.pathname + `?t=${t0}`, {
+      method: "HEAD",
+      cache: "no-store",
+    });
     const t1 = Date.now();
     const header = res.headers.get("date");
     if (header) {
@@ -64,6 +77,17 @@ export function currentPhase(ms: number, forced?: string | null): Phase {
   return cur;
 }
 
+/** The big headline for a moment in time. Previewing a day (?tithi=) shows that day's greeting. */
+export function greetingAt(ms: number, forced?: Phase | null): Greeting {
+  const at = forced ? phaseStart(forced) : ms;
+  let g = GREETINGS[0];
+  for (const x of GREETINGS) {
+    const [d, t] = x.start.split("T");
+    if (at >= istInstant(d, t ?? "00:00")) g = x;
+  }
+  return g;
+}
+
 export function phaseById(id: PhaseId) {
   return PHASES.find((p) => p.id === id)!;
 }
@@ -84,17 +108,29 @@ export interface Upcoming {
 
 export function upcoming(ms: number): Upcoming {
   const today = istDate(ms);
-  const todays = EVENTS.filter((e) => e.date === today && (e.time === null || istInstant(e.date, e.time) > ms));
+  const todays = EVENTS.filter(
+    (e) =>
+      e.date === today && (e.time === null || istInstant(e.date, e.time) > ms),
+  );
   const later = EVENTS.filter((e) => {
     const at = istInstant(e.date, e.time ?? "00:00");
     return at > ms && !(e.date === today && e.time === null);
-  }).sort((a, b) => istInstant(a.date, a.time ?? "00:00") - istInstant(b.date, b.time ?? "00:00"));
+  }).sort(
+    (a, b) =>
+      istInstant(a.date, a.time ?? "00:00") -
+      istInstant(b.date, b.time ?? "00:00"),
+  );
   const next = todays.find((e) => e.time) ?? later[0] ?? null;
-  return { today: todays.filter((e) => e.time === null), next, target: next ? istInstant(next.date, next.time ?? "00:00") : null };
+  return {
+    today: todays.filter((e) => e.time === null),
+    next,
+    target: next ? istInstant(next.date, next.time ?? "00:00") : null,
+  };
 }
 
 const BN = "০১২৩৪৫৬৭৮৯";
-export const bn = (v: number | string) => String(v).replace(/\d/g, (d) => BN[+d]);
+export const bn = (v: number | string) =>
+  String(v).replace(/\d/g, (d) => BN[+d]);
 
 export function formatLeft(msLeft: number) {
   const s = Math.max(0, Math.floor(msLeft / 1000));
@@ -109,6 +145,28 @@ export function formatLeft(msLeft: number) {
 
 export function formatDateBn(date: string) {
   const [, mo, d] = date.split("-").map(Number);
-  const months = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+  const months = [
+    "জানুয়ারি",
+    "ফেব্রুয়ারি",
+    "মার্চ",
+    "এপ্রিল",
+    "মে",
+    "জুন",
+    "জুলাই",
+    "আগস্ট",
+    "সেপ্টেম্বর",
+    "অক্টোবর",
+    "নভেম্বর",
+    "ডিসেম্বর",
+  ];
   return `${bn(d)} ${months[mo - 1]}`;
+}
+
+export function formatDayEn(date: string) {
+  return new Date(`${date}T12:00:00+05:30`).toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "Asia/Kolkata",
+  });
 }
