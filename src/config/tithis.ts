@@ -1,0 +1,195 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// THE TITHI ENGINE CONFIG
+//
+// Everything about "which day of pujo is it" lives here. All times are IST
+// (Asia/Kolkata). Visitors anywhere in the world see Kolkata's tithi.
+//
+// Dates below are the Kolkata calendar for 2026 (Drik Panchang):
+//   Shashthi Sat 17 Oct, Saptami Sun 18, Ashtami Mon 19 (Kumari + Sandhi),
+//   Navami Tue 20, Bijoya Dashami + sindoor khela Wed 21 Oct.
+// Verify with your own panjika (Bisuddha Siddhanta / Gupta Press) and edit freely.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type PhaseId =
+  | "agomoni"
+  | "shashthi"
+  | "saptami"
+  | "ashtami"
+  | "navami"
+  | "dashami"
+  | "bijoya";
+
+export type Slot = "bhor" | "dupur" | "sondhe" | "raat";
+
+export interface Caption {
+  bn: string;
+  en: string;
+}
+
+export interface Phase {
+  id: PhaseId;
+  bn: string; // short Bengali name
+  bnLong: string; // how it is said on the day
+  en: string;
+  /** When this phase begins, IST, "YYYY-MM-DDTHH:mm". It lasts until the next phase starts. */
+  start: string;
+  /** UI accent colours for this phase */
+  palette: { accent: string; glow: string; ink: string; wash: string };
+  captions: Caption[];
+  /** Song tags this phase prefers. Untagged songs play in every phase. */
+  songTags: string[];
+}
+
+export const PHASES: Phase[] = [
+  {
+    id: "agomoni",
+    bn: "আগমনী",
+    bnLong: "মা আসছেন",
+    en: "Agomoni",
+    start: "2026-10-10T00:00", // Mahalaya
+    palette: { accent: "#f2c14e", glow: "#ffe3a3", ink: "#2a1608", wash: "#7aa6c9" },
+    songTags: ["agomoni"],
+    captions: [
+      { bn: "আকাশে পেঁজা তুলোর মেঘ, মাঠে কাশফুল। মা আসছেন।", en: "Cotton clouds above, kash in the fields. Ma is on her way." },
+      { bn: "কুমোরটুলিতে শেষ তুলির টান পড়ছে।", en: "The last brushstrokes are landing in Kumortuli." },
+      { bn: "বাঁশের কাঠামো উঠছে, পাড়ার ছেলেরা রাত জাগছে।", en: "Bamboo frames are rising, and the para boys stay up all night." },
+      { bn: "ট্রেনের টিকিট কাটা হয়ে গেছে? বাড়ি ফেরার পালা।", en: "Train tickets booked? Time to go home." },
+      { bn: "শিউলির গন্ধে ভোর হচ্ছে।", en: "Mornings smell of shiuli now." },
+      { bn: "নতুন জামার ভাঁজ এখনও খোলা হয়নি।", en: "The new clothes are still folded, waiting." },
+    ],
+  },
+  {
+    id: "shashthi",
+    bn: "ষষ্ঠী",
+    bnLong: "মহাষষ্ঠী",
+    en: "Maha Shashthi",
+    start: "2026-10-17T00:00",
+    palette: { accent: "#f59e3b", glow: "#ffd28a", ink: "#2b1205", wash: "#c96a3b" },
+    songTags: ["shashthi"],
+    captions: [
+      { bn: "বেলতলায় বোধন, ঘুম ভাঙছে মায়ের।", en: "Bodhon under the bel tree. Ma awakens." },
+      { bn: "ঢাকিরা এসে গেছে, পালক দোলানো ঢাক নিয়ে।", en: "The dhakis are here, plumes swaying on their dhaks." },
+      { bn: "আজ প্যান্ডেলের আলো জ্বলল প্রথমবার।", en: "Tonight the pandal lights came on for the first time." },
+      { bn: "ষষ্ঠীর সন্ধে মানেই শুরুর শুরু।", en: "Shashthi evening: the beginning of the beginning." },
+      { bn: "পাড়ার মোড়ে ফুচকার লাইন লম্বা হচ্ছে।", en: "The fuchka line at the corner keeps getting longer." },
+    ],
+  },
+  {
+    id: "saptami",
+    bn: "সপ্তমী",
+    bnLong: "মহাসপ্তমী",
+    en: "Maha Saptami",
+    start: "2026-10-18T00:00",
+    palette: { accent: "#f4d06f", glow: "#fff0c2", ink: "#0f1a2a", wash: "#6f8fb8" },
+    songTags: ["saptami"],
+    captions: [
+      { bn: "ভোরের গঙ্গায় কলাবউ স্নান।", en: "Kola bou's bath in the dawn Ganga." },
+      { bn: "লালপাড় শাড়িতে নবপত্রিকা এলেন গণেশের পাশে।", en: "In a red-bordered saree, Nabapatrika takes her place beside Ganesh." },
+      { bn: "ঢাকের বোলে পাড়া জেগে উঠল।", en: "The para wakes to the beat of the dhak." },
+      { bn: "সপ্তমীর সন্ধ্যারতি, ধুনোর গন্ধে ভরা মণ্ডপ।", en: "Saptami aarti, the mandap thick with the scent of dhuno." },
+      { bn: "আজ থেকে চারদিন, ঘড়ি দেখা বারণ।", en: "For four days now, nobody checks the clock." },
+    ],
+  },
+  {
+    id: "ashtami",
+    bn: "অষ্টমী",
+    bnLong: "মহাষ্টমী",
+    en: "Maha Ashtami",
+    start: "2026-10-19T00:00",
+    palette: { accent: "#ffcf3f", glow: "#fff1b0", ink: "#2a0d05", wash: "#e0a030" },
+    songTags: ["ashtami"],
+    captions: [
+      { bn: "অষ্টমীর অঞ্জলি, হাতে ফুল, মুখে মন্ত্র।", en: "Ashtami anjali: flowers in hand, mantra on the lips." },
+      { bn: "নতুন শাড়ি, নতুন পাঞ্জাবি, পুরোনো বন্ধুরা।", en: "New sarees, new panjabis, old friends." },
+      { bn: "কুমারী পুজোয় ছোট্ট মেয়েটির মধ্যেই মাকে দেখা।", en: "At Kumari pujo, we see Ma in a little girl." },
+      { bn: "একশো আটটা প্রদীপ, একশো আটটা পদ্ম। সন্ধিক্ষণ।", en: "108 lamps, 108 lotuses. The sacred junction." },
+      { bn: "শালপাতায় ভোগের খিচুড়ি, লাবড়া, চাটনি।", en: "Bhog khichuri, labra and chutney on sal leaves." },
+    ],
+  },
+  {
+    id: "navami",
+    bn: "নবমী",
+    bnLong: "মহানবমী",
+    en: "Maha Navami",
+    start: "2026-10-20T00:00",
+    palette: { accent: "#e9a23b", glow: "#ffc977", ink: "#120618", wash: "#5b2a6e" },
+    songTags: ["navami"],
+    captions: [
+      { bn: "ধুনুচি হাতে নাচ, ঢাকের তালে তালে।", en: "Dhunuchi in hand, dancing to the dhak." },
+      { bn: "যেও না, নবমী নিশি, যেও না।", en: "Don't go, Navami night, don't go." },
+      { bn: "নাগরদোলায় শেষ পাক, হাতে কাঠি আইসক্রিম।", en: "One last ride on the nagordola, an ice lolly in hand." },
+      { bn: "নবমীর রাত, ফুরিয়ে আসছে সময়।", en: "Navami night. Time is running out." },
+      { bn: "রাত জেগে ঠাকুর দেখা: পায়ে ব্যথা, মনে আনন্দ।", en: "All-night pandal hopping: sore feet, full heart." },
+    ],
+  },
+  {
+    id: "dashami",
+    bn: "দশমী",
+    bnLong: "বিজয়া দশমী",
+    en: "Bijoya Dashami",
+    start: "2026-10-21T00:00",
+    palette: { accent: "#ff4b2b", glow: "#ffb199", ink: "#2a0505", wash: "#c2241a" },
+    songTags: ["dashami"],
+    captions: [
+      { bn: "দেবীবরণ, চোখের কোণে জল।", en: "Debi boron, and a tear in the corner of the eye." },
+      { bn: "সিঁদুরে রাঙা মুখ, সিঁদুর খেলা।", en: "Faces painted red. Sindoor khela." },
+      { bn: "মায়ের কানে কানে বলা: আবার এসো মা।", en: "Whispered in her ear: come again, Ma." },
+      { bn: "ঘাটে ঢাক বাজছে, শেষবারের মতো।", en: "The dhak plays at the ghat, one last time." },
+      { bn: "বলো দুগ্গা মাইকি, জয়!", en: "Bolo Dugga Maiki, joy!" },
+    ],
+  },
+  {
+    id: "bijoya",
+    bn: "বিজয়া",
+    bnLong: "শুভ বিজয়া",
+    en: "Shubho Bijoya",
+    start: "2026-10-22T00:00",
+    palette: { accent: "#f0c987", glow: "#ffe8c4", ink: "#1a1410", wash: "#9aa7b3" },
+    songTags: ["bijoya", "dashami"],
+    captions: [
+      { bn: "আসছে বছর আবার হবে।", en: "It will happen again, next year." },
+      { bn: "শুভ বিজয়া। প্রণাম নিও।", en: "Shubho Bijoya. Accept my pronam." },
+      { bn: "নারকেল নাড়ু আর নিমকি, বিজয়ার মিষ্টিমুখ।", en: "Narkel naru and nimki: the sweetness of Bijoya." },
+      { bn: "প্যান্ডেল খুলছে, বাঁশ নামছে, মন খারাপ।", en: "Pandals are coming down, and so are our spirits." },
+      { bn: "আবার এক বছরের অপেক্ষা শুরু।", en: "Another year of waiting begins." },
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RITUAL MOMENTS for the countdown chip.
+// `time: null` means "time not set yet": the site counts down to the day and
+// never shows a made-up clock time. Fill in exact times from your panjika,
+// e.g. time: "10:51".
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface PujoEvent {
+  id: string;
+  bn: string;
+  en: string;
+  date: string; // YYYY-MM-DD, IST
+  time: string | null; // HH:mm IST, or null until confirmed
+}
+
+export const EVENTS: PujoEvent[] = [
+  { id: "bodhon", bn: "বোধন", en: "Bodhon", date: "2026-10-17", time: null },
+  { id: "nabapatrika", bn: "নবপত্রিকা স্নান", en: "Nabapatrika snan", date: "2026-10-18", time: null },
+  { id: "anjali", bn: "অষ্টমীর অঞ্জলি", en: "Ashtami anjali", date: "2026-10-19", time: null },
+  { id: "kumari", bn: "কুমারী পুজো", en: "Kumari pujo", date: "2026-10-19", time: null },
+  // TODO: Sandhi pujo clock time differs by panjika and city. Confirm before filling.
+  { id: "sandhi", bn: "সন্ধিপুজো", en: "Sandhi pujo", date: "2026-10-19", time: null },
+  { id: "navami", bn: "মহানবমী", en: "Maha Navami", date: "2026-10-20", time: null },
+  { id: "sindoor", bn: "সিঁদুর খেলা", en: "Sindoor khela", date: "2026-10-21", time: null },
+  { id: "bisarjan", bn: "বিসর্জন", en: "Bisarjan", date: "2026-10-21", time: null },
+];
+
+/** Time-of-day slots, IST hours. Used to pick which of today's scenes shows first. */
+export const SLOTS: { id: Slot; from: number; to: number; bn: string }[] = [
+  { id: "bhor", from: 4, to: 10, bn: "ভোর" },
+  { id: "dupur", from: 10, to: 16, bn: "দুপুর" },
+  { id: "sondhe", from: 16, to: 19.5, bn: "সন্ধে" },
+  { id: "raat", from: 19.5, to: 28, bn: "রাত" }, // 28 = 4 AM next day
+];
+
+/** How long each scene stays before crossfading to the next (ms). */
+export const SCENE_ROTATE_MS = 75_000;

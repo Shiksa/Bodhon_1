@@ -1,26 +1,307 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: "Galada", "Tiro Bangla", serif;
+  --font-serif: "Tiro Bangla", Georgia, serif;
+  --font-ui: "Hind Siliguri", system-ui, sans-serif;
+  --color-ivory: #fbf1dc;
+  --color-sindoor: #e3261a;
+  --color-gold: #f2c14e;
+  --color-ink: #1a0b06;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: #f2c14e;
+  --glow: #ffe3a3;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  background: #120806;
+  color: var(--color-ivory);
+  font-family: var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* ── Scene motion (SVG + HTML). Everything here stops under reduced motion. ── */
+
+.fx-sway {
+  animation: fx-sway 5s ease-in-out infinite alternate;
+}
+@keyframes fx-sway {
+  from { transform: rotate(calc(var(--sw, 2.5deg) * -1)); }
+  to { transform: rotate(var(--sw, 2.5deg)); }
+}
+
+.fx-flicker {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fx-flicker 1.7s ease-in-out infinite;
+}
+@keyframes fx-flicker {
+  0%, 100% { transform: scale(1, 1); opacity: 1; }
+  20% { transform: scale(0.9, 1.1); }
+  45% { transform: scale(1.06, 0.93); opacity: 0.85; }
+  70% { transform: scale(0.96, 1.06); }
+}
+.fx-flickerRow {
+  animation: fx-row 2.3s ease-in-out infinite alternate;
+}
+@keyframes fx-row {
+  from { opacity: 0.82; }
+  to { opacity: 1; }
+}
+
+.fx-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fx-breathe 4s ease-in-out infinite alternate;
+}
+@keyframes fx-breathe {
+  from { opacity: 0.55; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+
+.fx-twinkle {
+  animation: fx-twinkle 2.6s ease-in-out infinite alternate;
+}
+@keyframes fx-twinkle {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+.fx-chase {
+  animation: fx-chase 1.4s steps(2, jump-none) infinite;
+}
+@keyframes fx-chase {
+  0% { opacity: 1; }
+  100% { opacity: 0.25; }
+}
+
+.fx-smoke {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: fx-smoke 7s linear infinite;
+}
+@keyframes fx-smoke {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  12% { opacity: 0.6; }
+  55% { opacity: 0.32; }
+  100% { transform: translate(var(--dx, 20px), var(--dy, -260px)) scale(3.2); opacity: 0; }
+}
+
+.fx-drift {
+  animation: fx-drift 70s ease-in-out infinite alternate;
+}
+@keyframes fx-drift {
+  from { transform: translateX(-50px); }
+  to { transform: translateX(50px); }
+}
+
+.fx-drum {
+  animation: fx-drum 0.3s ease-in-out infinite alternate;
+}
+@keyframes fx-drum {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(7deg); }
+}
+
+.fx-dance {
+  animation: fx-dance 1.15s ease-in-out infinite alternate;
+}
+@keyframes fx-dance {
+  from { transform: rotate(-7deg) translateY(0); }
+  to { transform: rotate(6deg) translateY(-4px); }
+}
+
+.fx-aarti {
+  animation: fx-aarti 2.4s ease-in-out infinite;
+}
+@keyframes fx-aarti {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-16deg); }
+  50% { transform: rotate(-4deg); }
+  75% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.fx-spin {
+  animation: fx-spin 40s linear infinite;
+}
+@keyframes fx-spin {
+  to { transform: rotate(360deg); }
+}
+
+.fx-train {
+  animation: fx-train 48s linear infinite;
+}
+@keyframes fx-train {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--tw, 2400px)); }
+}
+
+.fx-shimmer {
+  animation: fx-shimmer 3.2s ease-in-out infinite alternate;
+}
+@keyframes fx-shimmer {
+  from { opacity: 0.08; transform: translateX(-6px); }
+  to { opacity: 0.55; transform: translateX(6px); }
+}
+
+.fx-flag {
+  animation: fx-flag 2.6s ease-in-out infinite alternate;
+}
+@keyframes fx-flag {
+  from { transform: rotate(-6deg); }
+  to { transform: rotate(6deg); }
+}
+
+/* Slow camera drift on the whole scene */
+.kenburns {
+  animation: kenburns 46s ease-in-out infinite alternate;
+  transform-origin: 50% 70%;
+}
+@keyframes kenburns {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to { transform: scale(1.09) translate3d(-1.2%, -0.6%, 0); }
+}
+
+/* ── HTML overlays ── */
+
+.fall {
+  position: absolute;
+  top: -40px;
+  animation: fall var(--t, 14s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+@keyframes fall {
+  0% { transform: translate3d(0, -5vh, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  50% { transform: translate3d(var(--sx, 40px), 50vh, 0) rotate(200deg); }
+  92% { opacity: 1; }
+  100% { transform: translate3d(calc(var(--sx, 40px) * -0.6), 108vh, 0) rotate(420deg); opacity: 0; }
+}
+
+.rise {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 999px;
+  animation: rise var(--t, 8s) ease-out infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+@keyframes rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(var(--sx, 20px), -70vh, 0); opacity: 0; }
+}
+
+.burst {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #ff4b2b 0%, #e3261a 55%, rgba(227, 38, 26, 0) 70%);
+  animation: burst 1.5s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+  pointer-events: none;
+}
+@keyframes burst {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s, 2.6)); opacity: 0; }
+}
+
+.caption-in {
+  animation: caption-in 900ms ease-out both;
+}
+@keyframes caption-in {
+  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.live-dot {
+  animation: live 1.6s ease-in-out infinite;
+}
+@keyframes live {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
+  70% { box-shadow: 0 0 0 7px rgba(255, 75, 43, 0); }
+}
+
+.dhak-beat {
+  animation: dhak-beat 0.6s ease-in-out infinite;
+}
+@keyframes dhak-beat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.05); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.03); }
+}
+
+.title-glow {
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.35),
+    0 0 28px color-mix(in srgb, var(--glow) 55%, transparent),
+    0 6px 40px rgba(0, 0, 0, 0.5);
+}
+
+.scrim-top {
+  background: linear-gradient(to bottom, rgba(10, 4, 2, 0.62), rgba(10, 4, 2, 0.15) 70%, transparent);
+}
+.scrim-bottom {
+  background: linear-gradient(to top, rgba(10, 4, 2, 0.75), rgba(10, 4, 2, 0.25) 60%, transparent);
+}
+
+/* Ornamental border for plaques and the player */
+.shola {
+  background:
+    linear-gradient(#fbf1dc, #f3e2bf) padding-box,
+    linear-gradient(135deg, #f7d77e, #a8741a, #f7d77e) border-box;
+  border: 2px solid transparent;
+}
+
+input[type="range"].vol {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 99px;
+  background: linear-gradient(to right, var(--accent) var(--v, 80%), rgba(251, 241, 220, 0.2) var(--v, 80%));
+}
+input[type="range"].vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--color-ivory);
+  border: 2px solid var(--accent);
+}
+input[type="range"].vol::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 99px;
+  background: var(--color-ivory);
+  border: 2px solid var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="fx-"],
+  .kenburns,
+  .fall,
+  .rise,
+  .dhak-beat,
+  .live-dot,
+  .caption-in {
+    animation: none !important;
+  }
+  .fx-smoke {
+    opacity: 0.22;
+    transform: translate(0, -60px) scale(1.6);
+  }
+  .fall,
+  .rise {
+    display: none;
+  }
 }
