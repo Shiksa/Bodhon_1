@@ -3,11 +3,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Phase } from "@/config/tithis";
 import { site } from "@/config/site";
-import { loopStart, playlistFor, scheduleAt, SOURCE, type Slot } from "@/lib/schedule";
+import {
+  loopStart,
+  playlistFor,
+  scheduleAt,
+  SOURCE,
+  type Slot,
+} from "@/lib/schedule";
 import { now, syncClock } from "@/lib/time";
 import { FATAL_ERRORS, loadYouTube, thumb, type YTPlayer } from "@/lib/youtube";
 
-export type RadioStatus = "idle" | "connecting" | "live" | "buffering" | "paused" | "offline";
+export type RadioStatus =
+  | "idle"
+  | "connecting"
+  | "live"
+  | "buffering"
+  | "paused"
+  | "offline";
 
 export interface NowPlaying {
   id?: string;
@@ -31,19 +43,27 @@ export function useRadio(phase: Phase) {
   const pendingJoin = useRef(false);
   const lastDrift = useRef(0);
   const clampRef = useRef<{ id: string; offset: number } | null>(null);
+  const failed = useRef(false);
 
   const [ready, setReady] = useState(false);
   const [status, setStatus] = useState<RadioStatus>("idle");
   const [bad, setBad] = useState<Set<string>>(() => new Set());
   const [slot, setSlot] = useState<Slot | null>(null);
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
-  const [meta, setMeta] = useState<{ id?: string; title?: string; author?: string }>({});
+  const [meta, setMeta] = useState<{
+    id?: string;
+    title?: string;
+    author?: string;
+  }>({});
   const [progress, setProgress] = useState({ pos: 0, dur: 0 });
   const [volume, setVolumeState] = useState(85);
 
   // The songs for today. In playlist mode they come from YouTube once the player loads.
   const list = useMemo(() => playlistFor(phase, bad), [phase, bad]);
-  const loopIds = useMemo(() => (SOURCE.kind === "playlist" ? playlistIds : list.map((s) => s.id)), [list, playlistIds]);
+  const loopIds = useMemo(
+    () => (SOURCE.kind === "playlist" ? playlistIds : list.map((s) => s.id)),
+    [list, playlistIds],
+  );
 
   const listRef = useRef(list);
   const loopIdsRef = useRef(loopIds);
@@ -56,11 +76,19 @@ export function useRadio(phase: Phase) {
     volRef.current = volume;
   }, [list, loopIds, phase, volume]);
 
-  const live = useCallback(() => scheduleAt(now(), phaseRef.current, listRef.current), []);
+  const live = useCallback(
+    () => scheduleAt(now(), phaseRef.current, listRef.current),
+    [],
+  );
 
   const readMeta = useCallback((p: YTPlayer) => {
     const d = p.getVideoData();
-    if (d?.video_id) setMeta((m) => (m.id === d.video_id && m.title === d.title ? m : { id: d.video_id, title: d.title, author: d.author }));
+    if (d?.video_id)
+      setMeta((m) =>
+        m.id === d.video_id && m.title === d.title
+          ? m
+          : { id: d.video_id, title: d.title, author: d.author },
+      );
   }, []);
 
   /** Start (or rejoin) playback at the live position. */
@@ -101,7 +129,8 @@ export function useRadio(phase: Phase) {
         playerRef.current = new YT.Player(mount, {
           width: "100%",
           height: "100%",
-          videoId: s?.song.id,
+          // Only pass videoId when there is one: YouTube throws "Invalid video id" for undefined.
+          ...(s ? { videoId: s.song.id } : {}),
           host: "https://www.youtube-nocookie.com",
           playerVars: {
             playsinline: 1,
@@ -129,7 +158,11 @@ export function useRadio(phase: Phase) {
                 becomeReady();
               } else if (SOURCE.kind === "loop") {
                 const ids = loopIdsRef.current;
-                const { index, offset } = loopStart(now(), phaseRef.current, ids.length);
+                const { index, offset } = loopStart(
+                  now(),
+                  phaseRef.current,
+                  ids.length,
+                );
                 p.cuePlaylist(ids, index, offset);
                 becomeReady();
               } else if (SOURCE.kind === "playlist") {
@@ -142,7 +175,11 @@ export function useRadio(phase: Phase) {
                     window.clearInterval(poll);
                     loopIdsRef.current = ids;
                     setPlaylistIds(ids);
-                    const { index, offset } = loopStart(now(), phaseRef.current, ids.length);
+                    const { index, offset } = loopStart(
+                      now(),
+                      phaseRef.current,
+                      ids.length,
+                    );
                     p.cuePlaylist(ids, index, offset);
                     becomeReady();
                   } else if (++tries > 40) {
@@ -160,7 +197,8 @@ export function useRadio(phase: Phase) {
                   joined.current = true;
                   if (SYNCED) {
                     const cur = live();
-                    if (cur && cur.song.id === loadedId.current) p.seekTo(cur.offset, true);
+                    if (cur && cur.song.id === loadedId.current)
+                      p.seekTo(cur.offset, true);
                   } else {
                     p.setLoop(true);
                   }
@@ -171,7 +209,8 @@ export function useRadio(phase: Phase) {
                 if (c && d?.video_id === c.id) {
                   const dur = p.getDuration();
                   if (dur > 0) {
-                    if (c.offset > dur - 20) p.seekTo(c.offset % Math.max(dur - 20, 1), true);
+                    if (c.offset > dur - 20)
+                      p.seekTo(c.offset % Math.max(dur - 20, 1), true);
                     clampRef.current = null;
                   }
                 }
@@ -190,7 +229,8 @@ export function useRadio(phase: Phase) {
                 if (SYNCED) {
                   // If the schedule moved on, follow it; if this video ran short, wait for the next slot.
                   const c2 = live();
-                  if (joined.current && c2 && c2.song.id !== loadedId.current) playLive();
+                  if (joined.current && c2 && c2.song.id !== loadedId.current)
+                    playLive();
                 } else if (joined.current) {
                   p.nextVideo();
                 }
@@ -210,7 +250,10 @@ export function useRadio(phase: Phase) {
           },
         });
       })
-      .catch(() => setStatus("offline"));
+      .catch(() => {
+        failed.current = true;
+        setStatus("offline");
+      });
     return () => {
       cancelled = true;
       window.clearInterval(poll);
@@ -253,7 +296,8 @@ export function useRadio(phase: Phase) {
           const c = live();
           if (!c || c.song.id !== loadedId.current) return;
           const drift = p.getCurrentTime() - c.offset;
-          if (Math.abs(drift) > DRIFT_LIMIT && c.offset < c.song.duration - 3) p.seekTo(c.offset, true);
+          if (Math.abs(drift) > DRIFT_LIMIT && c.offset < c.song.duration - 3)
+            p.seekTo(c.offset, true);
         });
       }
     };
@@ -272,13 +316,28 @@ export function useRadio(phase: Phase) {
     };
   }, [live, playLive, readMeta, ready, list]);
 
-  const hasSongs = SYNCED ? list.length > 0 : SOURCE.kind === "loop" ? loopIds.length > 0 : SOURCE.kind === "playlist";
+  const hasSongs = SYNCED
+    ? list.length > 0
+    : SOURCE.kind === "loop"
+      ? loopIds.length > 0
+      : SOURCE.kind === "playlist";
 
   const join = useCallback(() => {
     if (!hasSongs) return;
+    if (failed.current) {
+      setStatus("offline");
+      return;
+    }
     setStatus("connecting");
     if (!ready || !playerRef.current) {
       pendingJoin.current = true;
+      // Don't spin forever if YouTube never answers.
+      window.setTimeout(() => {
+        if (pendingJoin.current) {
+          pendingJoin.current = false;
+          setStatus("offline");
+        }
+      }, 15000);
       return;
     }
     joined.current = true;
@@ -311,10 +370,22 @@ export function useRadio(phase: Phase) {
       artist: song?.artist || (meta.id === song?.id ? meta.author : undefined),
       pos: slot ? Math.min(slot.song.duration, slot.offset) : 0,
       dur: song?.duration ?? 0,
-      next: slot && slot.next.id !== slot.song.id ? (slot.next.title ?? "পরের গান") : undefined,
+      next:
+        slot && slot.next.id !== slot.song.id
+          ? (slot.next.title ?? "পরের গান")
+          : undefined,
     };
   } else {
-    np = { id: meta.id, title: meta.title, artist: meta.author, pos: progress.pos, dur: status === "live" || status === "buffering" || status === "paused" ? progress.dur : 0 };
+    np = {
+      id: meta.id,
+      title: meta.title,
+      artist: meta.author,
+      pos: progress.pos,
+      dur:
+        status === "live" || status === "buffering" || status === "paused"
+          ? progress.dur
+          : 0,
+    };
   }
 
   // Lock-screen / notification metadata
@@ -345,6 +416,7 @@ export function useRadio(phase: Phase) {
     setVolume,
     join,
     pause,
-    listening: status === "live" || status === "buffering" || status === "connecting",
+    listening:
+      status === "live" || status === "buffering" || status === "connecting",
   };
 }

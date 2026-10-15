@@ -6,27 +6,133 @@ import { useRadio } from "@/hooks/useRadio";
 import { bn } from "@/lib/time";
 import { PauseIcon, PlayIcon, ShareIcon, VolumeIcon } from "./Icons";
 
-const mmss = (s: number) => `${bn(Math.floor(s / 60))}:${bn(String(Math.floor(s % 60)).padStart(2, "0"))}`;
+const mmss = (s: number) =>
+  `${bn(Math.floor(s / 60))}:${bn(String(Math.floor(s % 60)).padStart(2, "0"))}`;
 
-/** A small ornamental arch shown in the frame before songs are added. */
-function EmptyFrameArt() {
+/**
+ * Audio-only face for the radio: a spinning record whose label is the current
+ * song's YouTube cover. The YouTube player sits underneath it, hidden.
+ */
+function Record({ id, spinning }: { id?: string; spinning: boolean }) {
   return (
-    <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full" aria-hidden>
-      <defs>
-        <radialGradient id="ef" cx="0.5" cy="0.6" r="0.7">
-          <stop offset="0" stopColor="#ffe9a8" />
-          <stop offset="0.5" stopColor="#f2c14e" />
-          <stop offset="1" stopColor="#7a3a0a" />
-        </radialGradient>
-      </defs>
-      <rect width="200" height="200" fill="#1a0806" />
-      <path d="M40,180 L40,100 A60,60 0 0 1 160,100 L160,180 Z" fill="url(#ef)" className="fx-breathe" />
-      <path d="M52,180 L52,102 A48,48 0 0 1 148,102 L148,180" fill="none" stroke="#8a4a0a" strokeWidth="2" strokeDasharray="3 4" />
-    </svg>
+    <div className="relative h-full w-full">
+      <div
+        className={`record absolute inset-0 ${spinning ? "" : "record-paused"}`}
+      >
+        <svg viewBox="0 0 200 200" className="h-full w-full" aria-hidden>
+          <defs>
+            <radialGradient id="vinyl" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0.35" stopColor="#1f100b" />
+              <stop offset="1" stopColor="#0b0504" />
+            </radialGradient>
+            <clipPath id="label">
+              <circle cx="100" cy="100" r="38" />
+            </clipPath>
+          </defs>
+          <circle cx="100" cy="100" r="98" fill="url(#vinyl)" />
+          {Array.from({ length: 11 }, (_, i) => (
+            <circle
+              key={i}
+              cx="100"
+              cy="100"
+              r={44 + i * 5}
+              fill="none"
+              stroke="#ffffff"
+              strokeOpacity={i % 3 ? 0.05 : 0.09}
+              strokeWidth="1"
+            />
+          ))}
+          <circle
+            cx="100"
+            cy="100"
+            r="98"
+            fill="none"
+            stroke="#f2c14e"
+            strokeOpacity="0.5"
+            strokeWidth="1.5"
+          />
+          {id ? (
+            <image
+              href={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`}
+              x="52"
+              y="62"
+              width="96"
+              height="76"
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#label)"
+            />
+          ) : (
+            <g>
+              <circle cx="100" cy="100" r="38" fill="#c2241a" />
+              <text
+                x="100"
+                y="108"
+                textAnchor="middle"
+                fontSize="22"
+                fill="#fbf1dc"
+                fontFamily="Galada, serif"
+              >
+                বোধন
+              </text>
+            </g>
+          )}
+          <circle
+            cx="100"
+            cy="100"
+            r="38"
+            fill="none"
+            stroke="#f2c14e"
+            strokeWidth="2.5"
+          />
+          <circle cx="100" cy="100" r="4" fill="#f6e7c8" />
+        </svg>
+      </div>
+      {/* fixed sheen so the record reads as glossy while it spins */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-full bg-[conic-gradient(from_200deg,transparent_0deg,rgba(255,255,255,0.10)_25deg,transparent_60deg,transparent_180deg,rgba(255,255,255,0.07)_210deg,transparent_240deg)]"
+      />
+      {/* brass tonearm drops onto the record while it plays */}
+      <svg
+        viewBox="0 0 60 100"
+        aria-hidden
+        className="pointer-events-none absolute -right-2 -top-2 h-[62%] w-[38%] transition-transform duration-700 ease-out"
+        style={{
+          transformOrigin: "78% 12%",
+          transform: `rotate(${spinning ? 24 : 0}deg)`,
+        }}
+      >
+        <circle cx="47" cy="12" r="8" fill="#a8741a" />
+        <circle cx="47" cy="12" r="3.5" fill="#f2c14e" />
+        <path
+          d="M47,12 L30,82"
+          stroke="#f2c14e"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
+        <rect
+          x="23"
+          y="78"
+          width="12"
+          height="16"
+          rx="2"
+          transform="rotate(14 29 86)"
+          fill="#e9d6b8"
+        />
+      </svg>
+    </div>
   );
 }
 
-export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareText: string; onShare: () => void }) {
+export function RadioDock({
+  phase,
+  shareText,
+  onShare,
+}: {
+  phase: Phase;
+  shareText: string;
+  onShare: () => void;
+}) {
   const { hostRef, ...r } = useRadio(phase);
   const [muted, setMuted] = useState(false);
   const np = r.np;
@@ -40,36 +146,69 @@ export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareTe
   };
 
   const statusText =
-    r.status === "connecting" ? "যুক্ত হচ্ছে…" : r.status === "buffering" ? "বাজছে…" : r.status === "offline" ? "ইউটিউব পাওয়া যাচ্ছে না" : r.listening ? "সরাসরি বাজছে" : r.synced ? "সরাসরি · সবাই একসাথে" : "পুজোর গান · বিরামহীন";
+    r.status === "connecting"
+      ? "যুক্ত হচ্ছে…"
+      : r.status === "buffering"
+        ? "বাজছে…"
+        : r.status === "offline"
+          ? "ইউটিউব পাওয়া যাচ্ছে না"
+          : r.listening
+            ? "সরাসরি বাজছে"
+            : r.synced
+              ? "সরাসরি · সবাই একসাথে"
+              : "পুজোর গান · বিরামহীন";
 
   return (
     <section
       aria-label="Bodhan live radio"
-      className="dock relative mx-auto grid w-full max-w-[680px] gap-x-4 gap-y-3 rounded-[22px] border border-[color:var(--accent)]/45 bg-[#1a0906]/70 p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-xl [grid-template-areas:'frame_info''ctrl_ctrl'] [grid-template-columns:200px_1fr] sm:[grid-template-areas:'frame_info''frame_ctrl']"
+      className="dock relative mx-auto grid w-full max-w-[680px] gap-x-4 gap-y-3 rounded-[22px] border border-[color:var(--accent)]/45 bg-[#1a0906]/70 p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-xl [grid-template-areas:'frame_info''ctrl_ctrl'] [grid-template-columns:104px_1fr] sm:[grid-template-columns:132px_1fr] sm:[grid-template-areas:'frame_info''frame_ctrl']"
     >
       {/* corner ornaments */}
-      <span aria-hidden className="pointer-events-none absolute -top-[7px] left-1/2 h-3.5 w-24 -translate-x-1/2 rounded-full bg-[color:var(--accent)]/90 [mask:radial-gradient(circle_at_50%_100%,transparent_5px,#000_6px)]" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-[7px] left-1/2 h-3.5 w-24 -translate-x-1/2 rounded-full bg-[color:var(--accent)]/90 [mask:radial-gradient(circle_at_50%_100%,transparent_5px,#000_6px)]"
+      />
 
-      {/* The YouTube player stays visible, framed like a pandal window, as YouTube's terms require. */}
-      <div className="relative h-[200px] w-[200px] overflow-hidden rounded-2xl bg-black ring-2 ring-[color:var(--accent)]/70 [grid-area:frame]">
-        {!r.hasSongs && <EmptyFrameArt />}
-        <div ref={hostRef} className="absolute inset-0 [&>iframe]:h-full [&>iframe]:w-full" />
-        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
+      {/* Audio only: the YouTube player plays underneath, covered by the record. */}
+      <div className="relative h-[104px] w-[104px] self-center sm:h-[132px] sm:w-[132px] [grid-area:frame]">
+        <div
+          ref={hostRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-2 overflow-hidden rounded-full [&>iframe]:h-full [&>iframe]:w-full"
+        />
+        <div className="absolute inset-0 z-10">
+          <Record
+            id={r.hasSongs ? np.id : undefined}
+            spinning={r.status === "live"}
+          />
+        </div>
       </div>
 
       <div className="flex min-w-0 flex-col justify-center [grid-area:info]">
         <div className="mb-1.5 flex items-center gap-2 text-[12px] font-medium tracking-wide text-ivory/85">
-          <span className={`inline-block h-2 w-2 rounded-full bg-[#ff4b2b] ${r.listening ? "live-dot" : ""}`} />
+          <span
+            className={`inline-block h-2 w-2 rounded-full bg-[#ff4b2b] ${r.listening ? "live-dot" : ""}`}
+          />
           <span>{r.hasSongs ? statusText : "শিগগিরই"}</span>
         </div>
         {r.hasSongs ? (
           <>
-            <h2 className="line-clamp-2 font-serif text-[17px] leading-snug text-ivory sm:text-[19px]">{np.title ?? "পুজোর গান"}</h2>
-            <p className="mt-0.5 truncate text-[13px] text-ivory/65">{np.artist ?? (r.synced ? " " : "নন-স্টপ · Non-stop")}</p>
+            <h2 className="line-clamp-2 font-serif text-[17px] leading-snug text-ivory sm:text-[19px]">
+              {np.title ?? "পুজোর গান"}
+            </h2>
+            <p className="mt-0.5 truncate text-[13px] text-ivory/65">
+              {np.artist ?? (r.synced ? " " : "নন-স্টপ · Non-stop")}
+            </p>
             {np.dur > 0 && (
               <>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ivory/15" aria-hidden>
-                  <div className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-1000 ease-linear" style={{ width: `${pct}%` }} />
+                <div
+                  className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ivory/15"
+                  aria-hidden
+                >
+                  <div
+                    className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-1000 ease-linear"
+                    style={{ width: `${pct}%` }}
+                  />
                 </div>
                 <div className="mt-1 flex justify-between text-[11px] tabular-nums text-ivory/55">
                   <span>{mmss(np.pos)}</span>
@@ -79,14 +218,19 @@ export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareTe
             )}
             {np.next && (
               <p className="mt-1.5 truncate text-[12px] text-ivory/60">
-                <span className="text-[color:var(--accent)]">এর পরে</span> · {np.next}
+                <span className="text-[color:var(--accent)]">এর পরে</span> ·{" "}
+                {np.next}
               </p>
             )}
           </>
         ) : (
           <>
-            <h2 className="font-serif text-[18px] leading-snug text-ivory">গানের তালিকা তৈরি হচ্ছে</h2>
-            <p className="mt-1 text-[13px] text-ivory/65">Songs are being added. The radio goes live soon.</p>
+            <h2 className="font-serif text-[18px] leading-snug text-ivory">
+              গানের তালিকা তৈরি হচ্ছে
+            </h2>
+            <p className="mt-1 text-[13px] text-ivory/65">
+              Songs are being added. The radio goes live soon.
+            </p>
           </>
         )}
       </div>
@@ -110,7 +254,9 @@ export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareTe
             <PlayIcon />
             <span className="leading-none">
               {r.status === "paused" ? "আবার শুনুন" : "ঢাকে কাঠি পড়ুক"}
-              <span className="ml-2 hidden font-ui text-[12px] opacity-75 sm:inline">{r.status === "paused" ? "Rejoin live" : "Tap to listen"}</span>
+              <span className="ml-2 hidden font-ui text-[12px] opacity-75 sm:inline">
+                {r.status === "paused" ? "Rejoin live" : "Tap to listen"}
+              </span>
             </span>
           </button>
         )}

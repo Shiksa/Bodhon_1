@@ -8,7 +8,8 @@
 // Public or Unlisted) and paste its link here. You can add or remove songs on
 // YouTube any time and the site picks them up without redeploying.
 // Default below: "Durga Puja Special | Popular Bangla Jukebox" by Shemaroo Bengali Music.
-export const YOUTUBE_PLAYLIST = "https://www.youtube.com/playlist?list=PLC3FPEAM1FIPdo7HaymLeA9c2wFwt83Ii";
+export const YOUTUBE_PLAYLIST =
+  "https://www.youtube.com/playlist?list=PLC3FPEAM1FIPdo7HaymLeA9c2wFwt83Ii";
 
 // OPTION 2: your own list of songs, one YouTube link per line.
 // If you put anything here, it is used instead of the playlist above.
@@ -24,5 +25,12 @@ export const YOUTUBE_PLAYLIST = "https://www.youtube.com/playlist?list=PLC3FPEAM
 //   https://youtu.be/YYYYYYYYYYY | 4:32
 //   https://youtu.be/ZZZZZZZZZZZ | 5:10 | ashtami navami
 export const SONG_LINKS = `
-
+https://youtu.be/sf6usUybi3k
+https://youtu.be/4zyCkmAS1Oo
+https://youtu.be/tXXwsHeS_T0
+https://youtu.be/442ewPgXHQ0
+https://youtu.be/bhG8rZJlsDc
+https://youtu.be/xlElO06nQy8
+https://youtu.be/ml81ICj5wr4
+https://youtu.be/id5_3dKvEBg
 `;

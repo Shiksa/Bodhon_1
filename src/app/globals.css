@@ -32,8 +32,12 @@ body {
   animation: fx-sway 5s ease-in-out infinite alternate;
 }
 @keyframes fx-sway {
-  from { transform: rotate(calc(var(--sw, 2.5deg) * -1)); }
-  to { transform: rotate(var(--sw, 2.5deg)); }
+  from {
+    transform: rotate(calc(var(--sw, 2.5deg) * -1));
+  }
+  to {
+    transform: rotate(var(--sw, 2.5deg));
+  }
 }
 
 .fx-flicker {
@@ -42,17 +46,32 @@ body {
   animation: fx-flicker 1.7s ease-in-out infinite;
 }
 @keyframes fx-flicker {
-  0%, 100% { transform: scale(1, 1); opacity: 1; }
-  20% { transform: scale(0.9, 1.1); }
-  45% { transform: scale(1.06, 0.93); opacity: 0.85; }
-  70% { transform: scale(0.96, 1.06); }
+  0%,
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(0.9, 1.1);
+  }
+  45% {
+    transform: scale(1.06, 0.93);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(0.96, 1.06);
+  }
 }
 .fx-flickerRow {
   animation: fx-row 2.3s ease-in-out infinite alternate;
 }
 @keyframes fx-row {
-  from { opacity: 0.82; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.82;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .fx-breathe {
@@ -61,24 +80,38 @@ body {
   animation: fx-breathe 4s ease-in-out infinite alternate;
 }
 @keyframes fx-breathe {
-  from { opacity: 0.55; transform: scale(0.94); }
-  to { opacity: 1; transform: scale(1.06); }
+  from {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.06);
+  }
 }
 
 .fx-twinkle {
   animation: fx-twinkle 2.6s ease-in-out infinite alternate;
 }
 @keyframes fx-twinkle {
-  from { opacity: 0.35; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .fx-chase {
   animation: fx-chase 1.4s steps(2, jump-none) infinite;
 }
 @keyframes fx-chase {
-  0% { opacity: 1; }
-  100% { opacity: 0.25; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
 }
 
 .fx-smoke {
@@ -88,76 +121,124 @@ body {
   animation: fx-smoke 7s linear infinite;
 }
 @keyframes fx-smoke {
-  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  12% { opacity: 0.6; }
-  55% { opacity: 0.32; }
-  100% { transform: translate(var(--dx, 20px), var(--dy, -260px)) scale(3.2); opacity: 0; }
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.6;
+  }
+  55% {
+    opacity: 0.32;
+  }
+  100% {
+    transform: translate(var(--dx, 20px), var(--dy, -260px)) scale(3.2);
+    opacity: 0;
+  }
 }
 
 .fx-drift {
   animation: fx-drift 70s ease-in-out infinite alternate;
 }
 @keyframes fx-drift {
-  from { transform: translateX(-50px); }
-  to { transform: translateX(50px); }
+  from {
+    transform: translateX(-50px);
+  }
+  to {
+    transform: translateX(50px);
+  }
 }
 
 .fx-drum {
   animation: fx-drum 0.3s ease-in-out infinite alternate;
 }
 @keyframes fx-drum {
-  from { transform: rotate(-9deg); }
-  to { transform: rotate(7deg); }
+  from {
+    transform: rotate(-9deg);
+  }
+  to {
+    transform: rotate(7deg);
+  }
 }
 
 .fx-dance {
   animation: fx-dance 1.15s ease-in-out infinite alternate;
 }
 @keyframes fx-dance {
-  from { transform: rotate(-7deg) translateY(0); }
-  to { transform: rotate(6deg) translateY(-4px); }
+  from {
+    transform: rotate(-7deg) translateY(0);
+  }
+  to {
+    transform: rotate(6deg) translateY(-4px);
+  }
 }
 
 .fx-aarti {
   animation: fx-aarti 2.4s ease-in-out infinite;
 }
 @keyframes fx-aarti {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(-16deg); }
-  50% { transform: rotate(-4deg); }
-  75% { transform: rotate(10deg); }
-  100% { transform: rotate(0deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .fx-spin {
   animation: fx-spin 40s linear infinite;
 }
 @keyframes fx-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .fx-train {
   animation: fx-train 48s linear infinite;
 }
 @keyframes fx-train {
-  from { transform: translateX(0); }
-  to { transform: translateX(var(--tw, 2400px)); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--tw, 2400px));
+  }
 }
 
 .fx-shimmer {
   animation: fx-shimmer 3.2s ease-in-out infinite alternate;
 }
 @keyframes fx-shimmer {
-  from { opacity: 0.08; transform: translateX(-6px); }
-  to { opacity: 0.55; transform: translateX(6px); }
+  from {
+    opacity: 0.08;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 0.55;
+    transform: translateX(6px);
+  }
 }
 
 .fx-flag {
   animation: fx-flag 2.6s ease-in-out infinite alternate;
 }
 @keyframes fx-flag {
-  from { transform: rotate(-6deg); }
-  to { transform: rotate(6deg); }
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
 }
 
 /* Slow camera drift on the whole scene */
@@ -166,8 +247,12 @@ body {
   transform-origin: 50% 70%;
 }
 @keyframes kenburns {
-  from { transform: scale(1.02) translate3d(0, 0, 0); }
-  to { transform: scale(1.09) translate3d(-1.2%, -0.6%, 0); }
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.09) translate3d(-1.2%, -0.6%, 0);
+  }
 }
 
 /* ── HTML overlays ── */
@@ -180,11 +265,24 @@ body {
   will-change: transform;
 }
 @keyframes fall {
-  0% { transform: translate3d(0, -5vh, 0) rotate(0deg); opacity: 0; }
-  8% { opacity: 1; }
-  50% { transform: translate3d(var(--sx, 40px), 50vh, 0) rotate(200deg); }
-  92% { opacity: 1; }
-  100% { transform: translate3d(calc(var(--sx, 40px) * -0.6), 108vh, 0) rotate(420deg); opacity: 0; }
+  0% {
+    transform: translate3d(0, -5vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(var(--sx, 40px), 50vh, 0) rotate(200deg);
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(var(--sx, 40px) * -0.6), 108vh, 0)
+      rotate(420deg);
+    opacity: 0;
+  }
 }
 
 .rise {
@@ -196,9 +294,17 @@ body {
   will-change: transform, opacity;
 }
 @keyframes rise {
-  0% { transform: translate3d(0, 0, 0); opacity: 0; }
-  10% { opacity: 1; }
-  100% { transform: translate3d(var(--sx, 20px), -70vh, 0); opacity: 0; }
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--sx, 20px), -70vh, 0);
+    opacity: 0;
+  }
 }
 
 .burst {
@@ -206,39 +312,73 @@ body {
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  background: radial-gradient(circle, #ff4b2b 0%, #e3261a 55%, rgba(227, 38, 26, 0) 70%);
+  background: radial-gradient(
+    circle,
+    #ff4b2b 0%,
+    #e3261a 55%,
+    rgba(227, 38, 26, 0) 70%
+  );
   animation: burst 1.5s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
   pointer-events: none;
 }
 @keyframes burst {
-  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s, 2.6)); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      scale(var(--s, 2.6));
+    opacity: 0;
+  }
 }
 
 .caption-in {
   animation: caption-in 900ms ease-out both;
 }
 @keyframes caption-in {
-  from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
-  to { opacity: 1; transform: none; filter: none; }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 .live-dot {
   animation: live 1.6s ease-in-out infinite;
 }
 @keyframes live {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
-  70% { box-shadow: 0 0 0 7px rgba(255, 75, 43, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(255, 75, 43, 0);
+  }
 }
 
 .dhak-beat {
   animation: dhak-beat 0.6s ease-in-out infinite;
 }
 @keyframes dhak-beat {
-  0%, 100% { transform: scale(1); }
-  15% { transform: scale(1.05); }
-  30% { transform: scale(1); }
-  45% { transform: scale(1.03); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.05);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.03);
+  }
 }
 
 .title-glow {
@@ -249,10 +389,33 @@ body {
 }
 
 .scrim-top {
-  background: linear-gradient(to bottom, rgba(10, 4, 2, 0.62), rgba(10, 4, 2, 0.15) 70%, transparent);
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 4, 2, 0.62),
+    rgba(10, 4, 2, 0.15) 70%,
+    transparent
+  );
 }
 .scrim-bottom {
-  background: linear-gradient(to top, rgba(10, 4, 2, 0.75), rgba(10, 4, 2, 0.25) 60%, transparent);
+  background: linear-gradient(
+    to top,
+    rgba(10, 4, 2, 0.75),
+    rgba(10, 4, 2, 0.25) 60%,
+    transparent
+  );
+}
+
+/* The radio's record */
+.record {
+  animation: record-spin 3.6s linear infinite;
+}
+.record-paused {
+  animation-play-state: paused;
+}
+@keyframes record-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Ornamental border for plaques and the player */
@@ -268,7 +431,11 @@ input[type="range"].vol {
   appearance: none;
   height: 4px;
   border-radius: 99px;
-  background: linear-gradient(to right, var(--accent) var(--v, 80%), rgba(251, 241, 220, 0.2) var(--v, 80%));
+  background: linear-gradient(
+    to right,
+    var(--accent) var(--v, 80%),
+    rgba(251, 241, 220, 0.2) var(--v, 80%)
+  );
 }
 input[type="range"].vol::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -293,6 +460,7 @@ input[type="range"].vol::-moz-range-thumb {
   .rise,
   .dhak-beat,
   .live-dot,
+  .record,
   .caption-in {
     animation: none !important;
   }
