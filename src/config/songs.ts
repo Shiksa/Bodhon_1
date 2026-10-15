@@ -28,11 +28,11 @@ export const SONG_LINKS = `
 https://youtu.be/sf6usUybi3k
 https://youtu.be/4zyCkmAS1Oo
 https://youtu.be/tXXwsHeS_T0
-https://youtu.be/442ewPgXHQ0
 https://youtu.be/bhG8rZJlsDc
 https://youtu.be/xlElO06nQy8
 https://youtu.be/ml81ICj5wr4
 https://youtu.be/id5_3dKvEBg
 https://youtu.be/yzEbF55ywtM
 https://youtu.be/60tSbJWJCr0
+https://youtu.be/GSJDim_JP4M
 `;
