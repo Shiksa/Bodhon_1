@@ -172,7 +172,7 @@ export function RadioDock({
           : "Tap play · non-stop Pujo songs";
 
   const iconBtn =
-    "grid h-10 w-10 shrink-0 place-items-center rounded-full text-ivory/80 transition hover:bg-white/10 hover:text-ivory";
+    "grid h-11 w-11 shrink-0 place-items-center rounded-full text-ivory/80 transition hover:bg-white/10 hover:text-ivory";
   const vol = r.muted ? 0 : r.volume;
 
   const cover = (size: string) => (
@@ -187,7 +187,7 @@ export function RadioDock({
           className={`h-full w-full scale-[1.35] object-cover ${r.playing ? "cover-breathe" : ""}`}
         />
       ) : (
-        <span className="grid h-full w-full place-items-center font-display text-[20px] text-[color:var(--accent)]">
+        <span className="grid h-full w-full place-items-center font-display text-[24px] text-[color:var(--accent)]">
           বোধন
         </span>
       )}
@@ -197,7 +197,7 @@ export function RadioDock({
   const titleLine = (
     <div className="min-w-0 flex-1 overflow-hidden">
       <div
-        className={`whitespace-nowrap text-[15.5px] font-semibold text-ivory ${long ? "marquee" : "truncate"}`}
+        className={`whitespace-nowrap text-[16.5px] font-semibold text-ivory lg:text-[18px] ${long ? "marquee" : "truncate"}`}
       >
         {title}
         {long && <span className="pl-12">{title}</span>}
@@ -255,12 +255,12 @@ export function RadioDock({
         onClick={r.toggle}
         disabled={!r.hasSongs}
         aria-label={r.playing ? "Pause" : "Play"}
-        className={`mx-1 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-ivory text-[#2a0f08] shadow-[0_0_0_5px_rgba(255,255,255,0.08),0_0_26px_-6px_rgba(255,220,150,0.9)] transition hover:scale-105 disabled:opacity-50 ${!r.playing ? "play-glow" : ""}`}
+        className={`mx-1.5 grid h-[60px] w-[60px] shrink-0 place-items-center rounded-full bg-ivory text-[#2a0f08] shadow-[0_0_0_5px_rgba(255,255,255,0.08),0_0_26px_-6px_rgba(255,220,150,0.9)] transition hover:scale-105 disabled:opacity-50 ${!r.playing ? "play-glow" : ""}`}
       >
         {r.playing ? (
-          <PauseIcon width={22} height={22} />
+          <PauseIcon width={24} height={24} />
         ) : (
-          <PlayIcon width={22} height={22} className="ml-1" />
+          <PlayIcon width={24} height={24} className="ml-1" />
         )}
       </button>
       <button
@@ -290,26 +290,26 @@ export function RadioDock({
   return (
     <section
       aria-label="Music player"
-      className="relative mx-auto w-full max-w-[560px] rounded-[22px] border border-white/12 bg-[linear-gradient(135deg,rgba(64,24,14,0.9),rgba(28,10,6,0.9))] p-3 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:max-w-[820px] lg:px-3.5"
+      className="relative mx-auto w-full max-w-[560px] rounded-[22px] border border-white/12 bg-[linear-gradient(135deg,rgba(64,24,14,0.9),rgba(28,10,6,0.9))] p-4 shadow-[0_24px_60px_-14px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:max-w-[860px] lg:px-5 lg:py-5"
     >
       {/* the YouTube player plays here, hidden */}
       <div
         ref={hostRef}
         aria-hidden
-        className="pointer-events-none absolute left-3 top-3 h-14 w-14 overflow-hidden rounded-2xl opacity-[0.01] [&>iframe]:h-full [&>iframe]:w-full"
+        className="pointer-events-none absolute left-4 top-4 h-14 w-14 overflow-hidden rounded-2xl opacity-[0.01] [&>iframe]:h-full [&>iframe]:w-full"
       />
 
       {/* Desktop: one row */}
-      <div className="hidden items-center gap-3.5 lg:flex">
-        {cover("h-14 w-14")}
-        <div className="grid min-w-[300px] flex-1 gap-1">
+      <div className="hidden items-center gap-4 lg:flex">
+        {cover("h-[84px] w-[84px]")}
+        <div className="grid min-w-[300px] flex-1 gap-1.5">
           <div className="flex min-w-0 items-center gap-2">
             {titleLine}
             <YouTubeIcon className="shrink-0" />
             {playlistBtn}
           </div>
-          <div className="truncate text-[12.5px] text-ivory/60">{sub}</div>
-          <div className="flex items-center gap-2 text-[11px] tabular-nums text-ivory/55">
+          <div className="truncate text-[13.5px] text-ivory/60">{sub}</div>
+          <div className="flex items-center gap-2 text-[11.5px] tabular-nums text-ivory/55">
             <span className="w-9 text-right">{mmss(r.time.pos)}</span>
             {seekBar}
             <span className="w-9">{mmss(r.time.dur)}</span>
@@ -353,18 +353,16 @@ export function RadioDock({
       </div>
 
       {/* Phone and tablet: stacked */}
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 lg:hidden">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3.5 lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          {cover("h-[56px] w-[56px]")}
+          {cover("h-[68px] w-[68px]")}
           <div className="min-w-0 flex-1">
             {titleLine}
-            <div className="mt-0.5 truncate text-[12.5px] text-ivory/60">
-              {sub}
-            </div>
+            <div className="mt-1 truncate text-[13px] text-ivory/60">{sub}</div>
           </div>
           {playlistBtn}
         </div>
-        <div className="flex items-center gap-2 text-[11px] tabular-nums text-ivory/55">
+        <div className="flex items-center gap-2 text-[11.5px] tabular-nums text-ivory/55">
           <span className="w-9 text-right">{mmss(r.time.pos)}</span>
           {seekBar}
           <span className="w-9">{mmss(r.time.dur)}</span>
