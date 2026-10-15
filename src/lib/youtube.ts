@@ -3,6 +3,12 @@
 export interface YTPlayer {
   loadVideoById(o: { videoId: string; startSeconds?: number }): void;
   cueVideoById(o: { videoId: string; startSeconds?: number }): void;
+  cuePlaylist(list: string[] | { list: string; listType: "playlist"; index?: number; startSeconds?: number }, index?: number, startSeconds?: number): void;
+  loadPlaylist(list: string[] | { list: string; listType: "playlist"; index?: number; startSeconds?: number }, index?: number, startSeconds?: number): void;
+  getPlaylist(): string[] | null;
+  getPlaylistIndex(): number;
+  setLoop(loop: boolean): void;
+  nextVideo(): void;
   playVideo(): void;
   pauseVideo(): void;
   stopVideo(): void;

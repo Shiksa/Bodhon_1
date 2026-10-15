@@ -24,30 +24,44 @@ Node 20 or newer.
 
 ---
 
-## 1. Add your songs (do this first)
+## 1. Songs: an endless loop of pujo songs
 
-The radio stays in "coming soon" mode until it has songs.
+All the music is controlled from **one file: `src/config/songs.ts`**. It already has a Durga Puja playlist in it, so the radio works out of the box and loops forever.
 
-1. Run the site (`npm run dev`) and open **`/tools/playlist`**.
-2. Paste YouTube links, one per line. Optionally add tithi tags after a link:
-   ```
-   https://youtu.be/XXXXXXXXXXX
-   https://www.youtube.com/watch?v=YYYYYYYYYYY ashtami navami
-   ```
-3. Press **Read videos**. The tool loads each video (muted) in YouTube's own player and reads its real title, channel and length. No API key needed. Videos marked **blocked** don't allow embedding; find another upload of that song.
-4. **Download songs.json** and replace `src/data/songs.json` with it. Rebuild and deploy.
+### Easiest: use a YouTube playlist
 
-Tags decide which day a song plays on. Untagged songs play every day. A day with no tagged songs plays everything.
+1. On YouTube, make a playlist (for example "Bodhan Pujo Songs") and add the songs you want. Set it to **Public** or **Unlisted**.
+2. Copy the playlist link. It looks like `https://www.youtube.com/playlist?list=PLxxxxxxxx`.
+3. Paste it into `YOUTUBE_PLAYLIST` in `src/config/songs.ts`, save, and deploy once.
 
-Alternative: `npm run playlist` fills titles and durations with the YouTube Data API if you put `YT_API_KEY=...` in `.env.local` and list songs as `{ "url": "...", "tags": [...] }`.
+After that, adding or removing songs is done on YouTube itself. The site always plays whatever is in the playlist, no redeploy needed. When the last song finishes, it starts again from the first.
 
-### How the shared radio works
+### Or: list the songs yourself
 
-There is no server. Each phase's playlist starts at that phase's start time and loops, so every visitor computes the same answer from `(now - phaseStart) mod totalDuration`. The site corrects for wrong phone clocks by reading the time from its own host, and re-checks every 30 seconds, re-seeking if a listener drifts more than 2 seconds. If a video stops being playable, every visitor drops it at the same moment and stays in sync.
+Paste YouTube links between the backticks of `SONG_LINKS`, one per line:
 
-Audio only starts after a tap (browsers block autoplay with sound), so the first screen has one clear button: **ঢাকে কাঠি পড়ুক**. Tapping always joins the live position, like tuning a radio.
+```ts
+export const SONG_LINKS = `
+https://www.youtube.com/watch?v=XXXXXXXXXXX
+https://youtu.be/YYYYYYYYYYY
+`;
+```
 
-The YouTube player stays visible in the framed window in the dock. This is deliberate: YouTube's API terms do not allow hiding the player.
+If `SONG_LINKS` has any links, it is used instead of the playlist.
+
+### How visitors hear it
+
+- Nothing plays until the visitor taps **ঢাকে কাঠি পড়ুক** (browsers block sound before a tap).
+- The tap starts the loop at a point picked from the clock, so people who open the site around the same time hear the same song.
+- Songs that don't allow embedding are skipped automatically.
+
+### Optional: exact sync (everyone on the same second)
+
+If you add each song's length on its line (`https://youtu.be/XXXXXXXXXXX | 4:32`), the radio becomes fully synchronised. You don't have to time the songs yourself: open **`/tools/playlist`** on the running site, paste your links, press **Read videos**, and copy the result over `SONG_LINKS`. You can also add day tags after the length (`| 4:32 | ashtami navami`) so a song only plays on those days.
+
+In this mode each day's playlist starts at that day's start time and loops, so every visitor computes the same song and position from `(now - dayStart) mod totalLength`. The site corrects wrong phone clocks using its host's time and re-syncs every 30 seconds.
+
+The YouTube player stays visible in the framed window in the dock. This is deliberate: YouTube's API terms don't allow hiding the player.
 
 ---
 
@@ -95,7 +109,7 @@ Scene ids: `agomoni-kash`, `agomoni-kumortuli`, `agomoni-para`, `shashthi-bodhon
 
 **Cloudflare Pages** also works: build command `npm run build`, output directory `out`.
 
-Every change (songs, timings, art) is a commit and a redeploy, about a minute on any of these hosts.
+Every change to timings or art is a commit and a redeploy (songs in a YouTube playlist don't even need that), about a minute on any of these hosts.
 
 ---
 
@@ -107,8 +121,8 @@ src/
     site.ts          name, domain, brand logos and links
     tithis.ts        phases, captions, palettes, ritual events, time slots
     scenes.ts        22 scenes, their time of day, overlays and hotspots
+    songs.ts         THE MUSIC: a YouTube playlist link or a list of song links
   data/
-    songs.json       the playlist (generate with /tools/playlist)
     scene-assets.json  written by `npm run scenes`
   components/
     Bodhan.tsx       the page: title, captions, scene rotation, share, sindoor taps
@@ -125,7 +139,6 @@ creatives/
   raw/               drop AI paintings here
 scripts/
   scenes.mjs         optimise paintings, write the manifest
-  playlist.mjs       optional YouTube Data API filler
 ```
 
 Motion respects the "reduce motion" accessibility setting: overlays become still.

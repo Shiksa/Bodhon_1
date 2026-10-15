@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Phase } from "@/config/tithis";
 import { useRadio } from "@/hooks/useRadio";
-import { bn, now } from "@/lib/time";
+import { bn } from "@/lib/time";
 import { PauseIcon, PlayIcon, ShareIcon, VolumeIcon } from "./Icons";
 
 const mmss = (s: number) => `${bn(Math.floor(s / 60))}:${bn(String(Math.floor(s % 60)).padStart(2, "0"))}`;
@@ -29,16 +29,9 @@ function EmptyFrameArt() {
 export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareText: string; onShare: () => void }) {
   const { hostRef, ...r } = useRadio(phase);
   const [muted, setMuted] = useState(false);
-  const [, force] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => force((n) => n + 1), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const s = r.slot;
-  const pos = s ? Math.min(s.song.duration, s.offset + 0) : 0;
-  const pct = s ? (pos / s.song.duration) * 100 : 0;
-  const leftNow = s ? Math.max(0, (s.endsAt - now()) / 1000) : 0;
+  const np = r.np;
+  const pct = np.dur > 0 ? Math.min(100, (np.pos / np.dur) * 100) : 0;
+  const left = Math.max(0, np.dur - np.pos);
 
   const toggleMute = () => {
     const m = !muted;
@@ -47,7 +40,7 @@ export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareTe
   };
 
   const statusText =
-    r.status === "connecting" ? "যুক্ত হচ্ছে…" : r.status === "buffering" ? "বাজছে…" : r.status === "offline" ? "ইউটিউব পাওয়া যাচ্ছে না" : r.listening ? "সরাসরি বাজছে" : "সরাসরি · সবাই একসাথে";
+    r.status === "connecting" ? "যুক্ত হচ্ছে…" : r.status === "buffering" ? "বাজছে…" : r.status === "offline" ? "ইউটিউব পাওয়া যাচ্ছে না" : r.listening ? "সরাসরি বাজছে" : r.synced ? "সরাসরি · সবাই একসাথে" : "পুজোর গান · বিরামহীন";
 
   return (
     <section
@@ -71,18 +64,22 @@ export function RadioDock({ phase, shareText, onShare }: { phase: Phase; shareTe
         </div>
         {r.hasSongs ? (
           <>
-            <h2 className="line-clamp-2 font-serif text-[17px] leading-snug text-ivory sm:text-[19px]">{r.title ?? "পুজোর গান"}</h2>
-            <p className="mt-0.5 truncate text-[13px] text-ivory/65">{r.artist ?? " "}</p>
-            <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ivory/15" aria-hidden>
-              <div className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-1000 ease-linear" style={{ width: `${pct}%` }} />
-            </div>
-            <div className="mt-1 flex justify-between text-[11px] tabular-nums text-ivory/55">
-              <span>{mmss(pos)}</span>
-              <span>-{mmss(leftNow)}</span>
-            </div>
-            {s && s.next.id !== s.song.id && (
+            <h2 className="line-clamp-2 font-serif text-[17px] leading-snug text-ivory sm:text-[19px]">{np.title ?? "পুজোর গান"}</h2>
+            <p className="mt-0.5 truncate text-[13px] text-ivory/65">{np.artist ?? (r.synced ? " " : "নন-স্টপ · Non-stop")}</p>
+            {np.dur > 0 && (
+              <>
+                <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-ivory/15" aria-hidden>
+                  <div className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-1000 ease-linear" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="mt-1 flex justify-between text-[11px] tabular-nums text-ivory/55">
+                  <span>{mmss(np.pos)}</span>
+                  <span>-{mmss(left)}</span>
+                </div>
+              </>
+            )}
+            {np.next && (
               <p className="mt-1.5 truncate text-[12px] text-ivory/60">
-                <span className="text-[color:var(--accent)]">এর পরে</span> · {s.next.title ?? "পরের গান"}
+                <span className="text-[color:var(--accent)]">এর পরে</span> · {np.next}
               </p>
             )}
           </>

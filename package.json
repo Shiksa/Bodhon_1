@@ -8,7 +8,6 @@
     "prebuild": "node scripts/scenes.mjs",
     "build": "next build",
     "start": "npx serve out",
-    "playlist": "node scripts/playlist.mjs",
     "lint": "eslint"
   },
   "dependencies": {
